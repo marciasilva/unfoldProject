@@ -18,6 +18,7 @@ import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import parsing.ParseFeed;
 import processing.core.PApplet;
+import processing.core.*;
 
 /** EarthquakeCityMap
  * An application with an interactive map displaying earthquake data.
@@ -86,7 +87,7 @@ public class EarthquakeCityMap extends PApplet {
 		//earthquakesURL = "test2.atom";
 		
 		// Uncomment this line to take the quiz
-		earthquakesURL = "quiz2.atom";
+		earthquakesURL = "2.5_week.atom";
 		
 		
 		// (2) Reading in earthquake data and geometric properties
@@ -108,17 +109,30 @@ public class EarthquakeCityMap extends PApplet {
 	    for(PointFeature feature : earthquakes) {
 		  //check if LandQuake
 		  if(isLand(feature)) {
-		    quakeMarkers.add(new LandQuakeMarker(feature));
+			Location l = feature.getLocation();
+			System.out.println("lat: " +l.getLon() );
+			if(l.getLat() < 0.0)
+				quakeMarkers.add(new LandQuakeMarker(feature));
 		  }
 		  // OceanQuakes
 		  else {
-		    quakeMarkers.add(new OceanQuakeMarker(feature));
+			  Location l = feature.getLocation();
+			  System.out.println("lat: " +l.getLon() );
+			  if(l.getLat() < 0.0)
+				  quakeMarkers.add(new OceanQuakeMarker(feature));
 		  }
 	    }
 
 	    // could be used for debugging
 	    printQuakes();
 		sortAndPrint(20);
+		
+//		for(Marker m : quakeMarkers){
+//			Location l = m.getLocation();
+//			if(l.getLat() < 0){
+//				quakeMarkers.remove(m);
+//			}
+//		}
 
 	 		
 	    // (3) Add markers to map
@@ -132,10 +146,36 @@ public class EarthquakeCityMap extends PApplet {
 	
 	
 	public void draw() {
-		background(0);
+		background(1);
 		map.draw();
 		addKey();
 		
+	}
+	public void drawagain(){
+		setup();
+		map.draw();
+		//map = new UnfoldingMap(this, 200, 50, 650, 600, new Google.GoogleMapProvider());
+		background(0);
+	}
+	
+	//Filters 
+	
+	private void filterNorth(){
+		//EarthquakeMarker markersArray [] = quakeMarkers.toArray(new EarthquakeMarker[quakeMarkers.size()]); 
+		//List<EarthquakeMarker> list = Arrays.asList(markersArray);
+		for(Marker m : quakeMarkers){
+			Location l = m.getLocation();
+			if(l.getLat() < 0){
+				quakeMarkers.remove(m);
+			}
+		}
+		
+		//redraw();
+		drawagain();
+	}
+	
+	private void filterSouth(){
+		map.draw();
 	}
 	
 	
@@ -146,15 +186,6 @@ public class EarthquakeCityMap extends PApplet {
 		List<EarthquakeMarker> list = Arrays.asList(markersArray);
 
 		Collections.sort(list);
-		
-		if(numToPrint < list.size()){
-			for(Marker em: markersArray) {
-				System.out.println(em);
-		    }
-		}
-		else{
-			System.out.println(list.get(numToPrint));
-		}
 	
 	}
 	// and then call that method from setUp
@@ -202,7 +233,7 @@ public class EarthquakeCityMap extends PApplet {
 	 */
 	@Override
 	public void mouseClicked()
-	{
+	{		
 		if (lastClicked != null) {
 			unhideMarkers();
 			lastClicked = null;
@@ -214,6 +245,24 @@ public class EarthquakeCityMap extends PApplet {
 				checkCitiesForClick();
 			}
 		}
+	}
+	
+	
+	
+	public void mousePressed(){
+		System.out.println("mousePressed!!!!! ");
+		if(mouseY >= 300 && mouseY <= 318 && mouseX > 74){
+			System.out.println("Norht filter");
+			filterNorth();
+		}
+		else if(mouseY >= 320 && mouseY <= 338 && mouseX > 74){
+			System.out.println("South filter");
+			filterSouth();
+		}
+		System.out.println("moussex " + mouseX);
+//		System.out.println("moussey " + mouseY);
+
+
 	}
 	
 	// Helper method that will check if a city marker was clicked on
@@ -283,13 +332,14 @@ public class EarthquakeCityMap extends PApplet {
 	
 	// helper method to draw key in GUI
 	private void addKey() {	
+		
 		// Remember you can use Processing's graphics methods here
 		fill(255, 250, 240);
 		
 		int xbase = 25;
-		int ybase = 50;
+		int ybase = 50; 
 		
-		rect(xbase, ybase, 150, 250);
+		rect(xbase, ybase, 150, 300);
 		
 		fill(0);
 		textAlign(LEFT, CENTER);
@@ -332,6 +382,7 @@ public class EarthquakeCityMap extends PApplet {
 		text("Deep", xbase+50, ybase+180);
 
 		text("Past hour", xbase+50, ybase+200);
+		text("Filter: ", xbase + 50, ybase + 240);
 		
 		fill(255, 255, 255);
 		int centerx = xbase+35;
@@ -342,6 +393,18 @@ public class EarthquakeCityMap extends PApplet {
 		line(centerx-8, centery-8, centerx+8, centery+8);
 		line(centerx-8, centery+8, centerx+8, centery-8);
 		
+		//text("Filter", xbase + 50, ybase + 240);
+		//fill(255, 255, 255);
+		 // Construct the button
+
+		fill(15,50,50);
+		ellipse(60 + xbase,ybase + 260,16,16);
+		text("North", 80 + xbase, ybase + 260);
+
+		// Pink (pale red)
+		fill(55,20,30);
+		ellipse(60 + xbase,ybase + 280,16,16);
+		text("South", 80 + xbase, ybase + 280);
 		
 	}
 

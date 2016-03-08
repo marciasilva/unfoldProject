@@ -46,6 +46,12 @@ public abstract class EarthquakeMarker extends SimplePointMarker
 		super(feature.getLocation());
 		// Add a radius property and then set the properties
 		java.util.HashMap<String, Object> properties = feature.getProperties();
+		
+		for(String key : properties.keySet()){
+			System.out.println("key: " + key);
+			System.out.println("obj: " + properties.get(key));
+		}
+		
 		float magnitude = Float.parseFloat(properties.get("magnitude").toString());
 		properties.put("radius", 2*magnitude );
 		setProperties(properties);
@@ -100,6 +106,7 @@ public abstract class EarthquakeMarker extends SimplePointMarker
 	public float getRadius() {
 		return Float.parseFloat(getProperty("radius").toString());
 	}
+	
 	
 	public boolean isOnLand()
 	{
